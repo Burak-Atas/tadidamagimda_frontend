@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import './Home.css'
-import PostServicesWs from "../Services/PostServicesWs";
+import "./Home.css";
 import { LocationMarkerIcon, PhotographIcon } from "@heroicons/react/outline";
-import { useNavigate } from "react-router-dom"; // Yeni ekleme
+import { useNavigate } from "react-router-dom";
+import PostService from "../Services/PostService";
+import Post from "./Post";
 
-export default function Home({isMobile}) {
-  const [posts, setPosts] = useState([]); // Gönderileri tutmak için state
-  const [loading, setLoading] = useState(true); // Yüklenme durumu
+export default function Home({ isMobile, sse }) {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState(false);
   const [postContent, setPostContent] = useState({
     image: "",
@@ -15,9 +16,21 @@ export default function Home({isMobile}) {
     region: "",
     location: "",
   });
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const ps = new PostService();
+
+  // Yeni gönderi işleme
   const handleSubmit = () => {
-    console.log("Post:", postContent); // Post içeriğini işlemek için burada backend'e gönderilebilir.
-    setNewPost(false); // Post oluştuktan sonra modalı kapat
+  
+    console.log("Post:", postContent);
+
+    ps.Addpost(postContent).then((response)=> {
+      console.log(response)
+    })
+
+    setNewPost(false);
+    setPostContent({ image: "", text: "", name: "", region: "", location: "" });
   };
 
   const handleInputChange = (e) => {
@@ -26,110 +39,113 @@ export default function Home({isMobile}) {
       [e.target.name]: e.target.value,
     });
   };
-  // Diğer state ve fonksiyonlar...
-  const navigate = useNavigate(); // Yeni ekleme
 
+  // Yorum sayfasına yönlendirme
   const handlePage = (postId) => {
-    navigate(`/post/${postId}`); // Yorum sayfasına yönlendirme
+    navigate(`/post/${postId}`);
   };
 
-
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setPostContent({ ...postContent, image: URL.createObjectURL(file) });
+      const formData = new FormData();
+      formData.append('image', file);
+  
+      try {
+        const response = await ps.AddImage(formData); 
+        console.log(response.data["url"])
+        if (response.data["url"]) {
+          console.log(response);
+          setPostContent({ ...postContent, image: response.data["url"] }); 
+
+        } else {
+          console.error("Resim yükleme başarısız oldu");
+        }
+      } catch (error) {
+        console.error("Hata:", error);
+      }
     }
   };
-
-  const ws = new PostServicesWs();
+  
 
   useEffect(() => {
-    // WebSocket bağlantısını aç
-    ws.connect();
+    const handleNewMessage = (data) => {
+      console.log("Yeni gönderi:", data);
+      setPosts(data);
+      setLoading(false);
+    };
 
-    // WebSocket'tan gelen mesajları dinle
-    ws.onMessage((message) => {
-      // Mesajı al ve gönderi listesine ekle
-      const newPost = JSON.parse(message.data); // JSON formatında geldiğini varsayıyoruz
-      console.log(newPost)
-      setPosts( newPost);
-    });
+    const handleError = (error) => {
+      setError("Bağlantı hatası!");
+      console.error(error);
+    };
 
-    // Yüklenme durumunu false yap
-    setLoading(false);
+    sse.start(handleNewMessage, handleError);
 
-    // Bileşen unmount olduğunda WebSocket'i kapat
     return () => {
-      ws.disconnect();
+      sse.stop();
     };
   }, []);
 
-  // Yükleniyorsa yükleme mesajını göster
-  if (loading) {
-    return <div>Yükleniyor...</div>; // Yüklenme mesajı
-  }
+  // Beğeni işlevi
+  const handleLike = (id) => {
+    console.log(id)
+    ps.LikeRequest({ postID: id }).then((response)=>{
+      console.log(response)
+    })
+  };
+
+  // Gönderileri yenileme işlevi
+  const handleRefresh = () => {
+    setPosts(sse.newData);
+    console.log("sse içindeki new data verileir", sse.newData.length);
+    console.log("home page yenilendi");
+  };
 
   return (
     <>
-      {/* Burada ana içerik yer alacak */}
-        {/* Gönderileri göster */}
-        <div className="mt-5 space-y-4 w-full">
-  {/* Gönderileri göster */}
-  {posts.map((post, index) => (
-  <div key={index} className="bg-white border border-gray-300 p-4 rounded-lg shadow hover:shadow-lg transition-shadow duration-200">
-    <div className="flex items-center space-x-3 mb-3">
-      {/* Kullanıcı avatarı ve ismi */}
-      <img 
-        src={post.ImageUrl} 
-        alt="User Avatar" 
-        className="w-10 h-10 rounded-full" 
-      />
-      <div>
-        <h4 className="font-semibold text-gray-800">{post.Username}</h4>
-        <span className="text-gray-500 text-sm">{new Date(post.Timestamp).toLocaleString()}</span>
-      </div>
-    </div>
-    <div className="w-full mb-3">
-      <h4 className="text-lg font-medium text-gray-900">{post.Text}</h4>
-    </div>
-    <div className="w-full h-60">
-      <img 
-        src={post.ImageUrl} 
-        alt="post" 
-        className="w-full max-h-60	 object-fit rounded-lg" 
-      />
-    </div>
-    <div className="mt-3 text-gray-500 text-sm">
-      Yüklenme Tarihi: {new Date(post.CreatedAt).toLocaleString()}
-    </div>
-    <div className="flex justify-between items-center mt-3">
-      <div className="flex items-center space-x-2">
-        <button className="text-blue-500 hover:underline">Beğen</button>
-        <button className="text-blue-500 hover:underline" onClick={()=>handlePage(post.PostId)}>Yorum Yap {post.Comments.length}</button>
+      {error && <div className="text-red-500">{error}</div>}
+      {loading ? (
+        <div>Yükleniyor...</div>
+      ) : (
+        <div className=" mt-5 space-y-4 w-9/12">
+          {/* Yenile Butonu */}
+          {sse.newData.length >= 2 && (
+             <button
+             onClick={handleRefresh}
+             className={`absolute top-10 left-1/2 bg-blue-500 text-white p-2 rounded mb-4 ${
+               sse.newData.length >= 5 ? "opacity-100" : "opacity-50 cursor-not-allowed"
+             }`}
+             disabled={sse.newData.length < 5}
+           >
+             Yenile
+           </button>
+       
+          )}
+
+          <Post posts={posts} handleLike={handleLike} handlePage={handlePage} />
         </div>
-      <span className="text-gray-500">{post.CountLike} Beğeni</span>
-    </div>
-  </div>
-))}
-
-</div>
-
+      )}
 
       {/* Gönderi İkonu */}
-      <div className={`absolute bottom-10  ${isMobile?'right-1/4':'right-'}`}>
+      <div
+        className={`absolute bottom-10 ${isMobile ? "right-5" : "right-1/4 "}`}
+      >
         <button
-        onClick={()=>setNewPost(!newPost)}
-          className={`flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-200 ${isMobile?'':''}`}
-          aria-label="Yeni gönderi oluştur"
+          onClick={() => setNewPost(!newPost)}
+          className={`flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-200`}
         >
           +
         </button>
       </div>
       {newPost && (
         <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center bg-black bg-opacity-50">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-1/3 text-gray-200">
+          <div
+            className={`bg-gray-800 p-6 rounded-lg shadow-lg w-1/3 text-gray-200 ${
+              isMobile ? "w-10/12" : ""
+            }`}
+          >
             <h2 className="text-2xl font-bold mb-4">Yeni Gönderi Oluştur</h2>
-
             <div className="flex items-center space-x-4 mb-4">
               <input
                 name="name"
@@ -146,7 +162,6 @@ export default function Home({isMobile}) {
                 className="w-1/2 p-2 border border-gray-600 bg-gray-700 rounded"
               />
             </div>
-
             <textarea
               name="text"
               value={postContent.text}
@@ -154,7 +169,6 @@ export default function Home({isMobile}) {
               placeholder="Bir şeyler yazın..."
               className="w-full h-32 p-2 border border-gray-600 bg-gray-700 rounded mb-4"
             />
-
             <div className="flex items-center justify-between mb-4">
               <label className="cursor-pointer flex items-center space-x-2">
                 <PhotographIcon className="h-6 w-6 text-gray-400" />
@@ -166,8 +180,6 @@ export default function Home({isMobile}) {
                 />
                 <span>Resim Ekle</span>
               </label>
-
-              {/* Konum Ekleme */}
               <div className="flex items-center space-x-2">
                 <LocationMarkerIcon className="h-6 w-6 text-gray-800" />
                 <input
@@ -180,7 +192,6 @@ export default function Home({isMobile}) {
                 />
               </div>
             </div>
-
             {postContent.image && (
               <img
                 src={postContent.image}
@@ -188,7 +199,6 @@ export default function Home({isMobile}) {
                 className="w-20 h-20 object-cover rounded-lg mb-4"
               />
             )}
-
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setNewPost(false)}

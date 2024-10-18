@@ -1,33 +1,57 @@
 import axios from 'axios';
+import axiosInstance from './ConstantService';
 
 class AuthServices {
   constructor() {
-    this.apiURL = "https://your-api-url.com"; // API base URL
-    this.axiosInstance = axios.create({
-      baseURL: this.apiURL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    this.apiURL = "https://your-api-url.com/"; 
+    
+    this.User = null; 
   }
 
-  User = {
-    "email":"batas219@gmail.com",
-    "id":"2",
-    "name":"ataş"
+  setUser(userData) {
+    this.User = {
+      email: userData.email,
+      id: userData.id,
+      name: userData.name,
+      user_name:"burak"
+    };
   }
 
-  currentUser (){
+  CurrentUser() {
     return this.User;
   }
 
-  
-
-
-  fetchData(){
-
+  Login(formData) {
+    return axiosInstance.post('login', formData)
+      .then((response) => {
+        const userData = response.data;
+        this.setUser(userData); 
+        localStorage.setItem("token",userData.token)
+        return userData;
+      })
+      .catch((error) => {
+        console.error("Login error:", error);
+        throw error;
+      });
   }
 
+  Signup(formData){
+    return axiosInstance.post("/signup",formData)
+    .then((response) => {
+      console.log(response.data);
+      this.setUser(response.data);
+      localStorage.setItem("token",response.Token);
+    })
+    
+    .catch((error) => {
+      console.error("Signup error:", error);
+      throw error;
+    });
+  }
+
+  FetchUser(token){
+    return axiosInstance.get(`/userdetails?token=${token}`)
+  }
 }
 
-export default  AuthServices;
+export default AuthServices;

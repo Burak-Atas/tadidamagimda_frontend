@@ -6,14 +6,22 @@ import LocationBasedPosts from './Pages/LocationBasedPosts';
 import DefaulPage from './Pages/DefaulPage';
 
 function App() {
-  const auth = new AuthServices();
 
-  const [currentUser, setCurrentUser] = useState(false); // currentUser state'i oluşturuldu
+  useEffect(()=>{
+    const token = localStorage.getItem("token")
+    if(token){
+      const authService = new AuthServices()
 
-  useEffect(() => {
-    const user = auth.currentUser(); // Kullanıcıyı al
-    setCurrentUser(user.id); // State'i güncelle
-  }, []);
+      authService.FetchUser(token)
+      .then((response)=>{
+        console.log(response);
+        authService.setUser(response.data);
+      })
+      .catch((error)=>{
+        console.log("sistemsel bir hata olutşu.");
+      })
+    }
+  },[])
 
   return (
     <div className=''>
