@@ -10,10 +10,10 @@ export default function Home({ isMobile, sse }) {
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState(false);
   const [postContent, setPostContent] = useState({
-    image: "",
+    image_url: "",
     text: "",
     name: "",
-    region: "",
+    city: "",
     location: "",
   });
   const [error, setError] = useState(null);
@@ -30,7 +30,7 @@ export default function Home({ isMobile, sse }) {
     })
 
     setNewPost(false);
-    setPostContent({ image: "", text: "", name: "", region: "", location: "" });
+    setPostContent({ image_url: "", text: "", name: "", city: "", location: "" });
   };
 
   const handleInputChange = (e) => {
@@ -56,7 +56,7 @@ export default function Home({ isMobile, sse }) {
         console.log(response.data["url"])
         if (response.data["url"]) {
           console.log(response);
-          setPostContent({ ...postContent, image: response.data["url"] }); 
+          setPostContent({ ...postContent, image_url: response.data["url"] }); 
 
         } else {
           console.error("Resim yükleme başarısız oldu");
@@ -81,6 +81,7 @@ export default function Home({ isMobile, sse }) {
     };
 
     sse.start(handleNewMessage, handleError);
+
 
     return () => {
       sse.stop();
@@ -155,10 +156,10 @@ export default function Home({ isMobile, sse }) {
                 className="w-1/2 p-2 border border-gray-600 bg-gray-700 rounded"
               />
               <input
-                name="region"
-                value={postContent.region}
+                name="city"
+                value={postContent.city}
                 onChange={handleInputChange}
-                placeholder="Bölge"
+                placeholder="sehir"
                 className="w-1/2 p-2 border border-gray-600 bg-gray-700 rounded"
               />
             </div>
@@ -166,7 +167,7 @@ export default function Home({ isMobile, sse }) {
               name="text"
               value={postContent.text}
               onChange={handleInputChange}
-              placeholder="Bir şeyler yazın..."
+              placeholder="Bir şeyler yazın..."n
               className="w-full h-32 p-2 border border-gray-600 bg-gray-700 rounded mb-4"
             />
             <div className="flex items-center justify-between mb-4">
@@ -180,21 +181,11 @@ export default function Home({ isMobile, sse }) {
                 />
                 <span>Resim Ekle</span>
               </label>
-              <div className="flex items-center space-x-2">
-                <LocationMarkerIcon className="h-6 w-6 text-gray-800" />
-                <input
-                  type="text"
-                  name="location"
-                  value={postContent.location}
-                  onChange={handleInputChange}
-                  placeholder="Konum"
-                  className="p-2 border border-gray-600 bg-gray-700 rounded"
-                />
-              </div>
+             
             </div>
             {postContent.image && (
               <img
-                src={postContent.image}
+                src={postContent.image_url}
                 alt="Preview"
                 className="w-20 h-20 object-cover rounded-lg mb-4"
               />

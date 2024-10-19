@@ -2,20 +2,20 @@ import React from "react";
 
 export default function Post({posts,handleLike,handlePage}) {
   return (
-    <div>
-      {posts.map((post, index) => (
+    <>
+      {posts&&posts.map((post, index) => (
         <div
           key={index}
           className="bg-white border border-gray-300 p-4 rounded-lg shadow hover:shadow-lg transition-shadow duration-200"
         >
           <div className="flex items-center space-x-3 mb-3">
             <img
-              src={post.ImageUrl}
+              src={post.image_url}
               alt="User Avatar"
               className="w-10 h-10 rounded-full"
             />
             <div>
-              <h4 className="font-semibold text-gray-800">{post.Username}</h4>
+              <h4 className="font-semibold text-gray-800">{post.user_name}</h4>
               <span className="text-gray-500 text-sm">
                 {new Date(post.Timestamp).toLocaleString()}
               </span>
@@ -26,7 +26,7 @@ export default function Post({posts,handleLike,handlePage}) {
           </div>
           <div className="w-full h-60">
             <img
-              src={post.ImageUrl}
+              src={post.image_url}
               alt="post"
               className="w-full max-h-60 object-fit rounded-lg"
             />
@@ -53,6 +53,6 @@ export default function Post({posts,handleLike,handlePage}) {
           </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import AuthServices from "../Services/AuthServices";
+import { useNavigate } from "react-router-dom";
+
 
 export default function NotLogin() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -13,6 +15,7 @@ export default function NotLogin() {
     email: null,
     first_name: null,
     last_name: null,
+    user_name:null,
     password: null,
   });
 
@@ -24,17 +27,25 @@ export default function NotLogin() {
       first_name: signUpForm.first_name,
       last_name: signUpForm.last_name,
       password: signUpForm.password,
+      user_name : signUpForm.user_name
     };
 
     const auhtServices = new AuthServices()
-    auhtServices.Signup(formData)
-    .then(
-      (response)=>{
-        console.log(response)
-      }
-    ).catch((error)=>{
-      console.log(error)
+    auhtServices.Signup(formData)   
+    .then((response) => {
+      console.log(response.data);
+      console.log(response.data.Token);
+      auhtServices.setUser(response.data);
+      console.log(auhtServices.CurrentUser())
+      localStorage.setItem("token",response.data.Token);
+      return response.data.Token
+    })
+    
+    .catch((error) => {
+      console.error("Signup error:", error);
+      throw error;
     });
+
   };
 
   const handleChangeSignUp = (event) => {
@@ -252,6 +263,14 @@ export default function NotLogin() {
                 placeholder="Soyadınız"
                 className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
                 value={signUpForm.last_name || ""}
+                onChange={handleChangeSignUp}
+              />
+               <input
+                type="text"
+                name="user_name"
+                placeholder="kuallanıcı adı"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+                value={signUpForm.user_name || ""}
                 onChange={handleChangeSignUp}
               />
               <input

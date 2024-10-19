@@ -3,17 +3,17 @@ import axiosInstance from './ConstantService';
 
 class AuthServices {
   constructor() {
-    this.apiURL = "https://your-api-url.com/"; 
-    
     this.User = null; 
   }
 
   setUser(userData) {
     this.User = {
       email: userData.email,
-      id: userData.id,
-      name: userData.name,
-      user_name:"burak"
+      id: userData.user_id,
+      first_name: userData.first_name,
+      last_name:userData.last_name,
+      user_name:userData.user_name,
+      image_url:userData.profil_image_url,
     };
   }
 
@@ -37,16 +37,6 @@ class AuthServices {
 
   Signup(formData){
     return axiosInstance.post("/signup",formData)
-    .then((response) => {
-      console.log(response.data);
-      this.setUser(response.data);
-      localStorage.setItem("token",response.Token);
-    })
-    
-    .catch((error) => {
-      console.error("Signup error:", error);
-      throw error;
-    });
   }
 
   FetchUser(token){

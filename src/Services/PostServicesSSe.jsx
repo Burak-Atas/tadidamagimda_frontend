@@ -15,13 +15,11 @@ class PostServicesSSe {
 
       
       this.eventSource.onmessage = (event) => {
-        // Tüm gelen veriyi konsola yazdır
         console.log("Gelen veri:", event.data);
         if (this.count===0){
           if (onMessage) {
-            // "post" verisini almak için
             const postData = JSON.parse(event.data)["post"];
-            console.log("Post verisi:", postData);
+            console.log("post için resim verisi:", postData[3].image_url);
             onMessage(postData);
           }
         }else{

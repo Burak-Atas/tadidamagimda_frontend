@@ -10,13 +10,16 @@ import PostDetails from "../Components/PostDetails";
 import PostServicesSSe from "../Services/PostServicesSSe";
 import PrivateRoute from "../Private/PrivateRoute";
 import NotLogin from "../Components/NotLogin";
+import AuthServices from "../Services/AuthServices";
+import { StarIcon } from "@heroicons/react/outline";
 
-export default function DefaulPage() {
+export default function DefaulPage( {authService}) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sol Sidebar görünürlüğü için state
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false); // Sağ Sidebar mobilde görünürlüğü için state
   const [isMobile, setIsMobile] = useState(false); // Mobil ekran olup olmadığını kontrol etmek için state
   const navigate = useNavigate();
   const location = useLocation(); // Şu anki rotayı almak için
+
 
   // Ekran boyutuna göre sidebar kontrolü
   const handleResize = () => {
@@ -66,14 +69,14 @@ export default function DefaulPage() {
         <Routes>
           <Route path="/" element={<Home isMobile={isMobile} sse={sse} />} />
           <Route path="/notification" element={
-            <PrivateRoute>
+            <PrivateRoute authService={authService}>
               <Notification isMobile={isMobile} />
             </PrivateRoute>
           } />
           <Route path="/post/:id" element={<PostDetails isMobile={isMobile} />} />
           <Route path="/profil" element={
-            <PrivateRoute>
-              <Profil isMobile={isMobile} />
+            <PrivateRoute authService={authService}>
+              <Profil isMobile={isMobile}  authService={authService}  />
             </PrivateRoute>
           } />
           <Route path="/login" element={<NotLogin isMobile={isMobile} sse={sse} />} />
@@ -115,6 +118,9 @@ export default function DefaulPage() {
           <button onClick={() => navigate("/notification")} className="text-gray-600">
             <FaBell size={24} />
           </button>
+           <button  onClick={() => navigate("/notification")}  className="flex items-center space-x-1 md:space-x-2 text-sm md:text-lg cursor-pointer hover:bg-gray-600 rounded p-1 md:p-2 hover:text-white font-bold">
+          <StarIcon className="h-5 w-5 md:h-6 md:w-6 text-gray-800" />
+        </button>
           <button onClick={() => navigate("/profil")} className="text-gray-600">
             <FaUser size={24} />
           </button>
