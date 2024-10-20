@@ -19,7 +19,6 @@ class PostServicesSSe {
         if (this.count===0){
           if (onMessage) {
             const postData = JSON.parse(event.data)["post"];
-            console.log("post için resim verisi:", postData[3].image_url);
             onMessage(postData);
           }
         }else{

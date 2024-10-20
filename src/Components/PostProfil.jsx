@@ -1,7 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
-export default function Post({posts,handleLike,handlePage}) {
+export default function PostProfil({posts,handleLike,handlePage}) {
   return (
     <>
       {posts&&posts.map((post, index) => (
@@ -10,7 +9,6 @@ export default function Post({posts,handleLike,handlePage}) {
           className="bg-white border border-gray-300 p-4 rounded-lg shadow hover:shadow-lg transition-shadow duration-200"
         >
           <div className="flex items-center space-x-3 mb-3">
-            <Link to ={`profil/${post.user_name}`}>
             <img
               src={post.image_url}
               alt="User Avatar"
@@ -18,11 +16,13 @@ export default function Post({posts,handleLike,handlePage}) {
             />
             <div>
               <h4 className="font-semibold text-gray-800">{post.user_name}</h4>
+              <span className="text-gray-500 text-sm">
+                {new Date(post.Timestamp).toLocaleString()}
+              </span>
             </div>
-            </Link>
           </div>
           <div className="w-full mb-3">
-            <h4 className="text-lg font-medium text-gray-900">{post.post.Text || post.Text}</h4>
+            <h4 className="text-lg font-medium text-gray-900">{post.Text}</h4>
           </div>
           <div className="w-full h-60">
             <img
@@ -32,24 +32,24 @@ export default function Post({posts,handleLike,handlePage}) {
             />
           </div>
           <div className="mt-3 text-gray-500 text-sm">
-            Yüklenme Tarihi: {new Date(post.post.CreatedAt).toLocaleString()}
+            Yüklenme Tarihi: {new Date(post.CreatedAt).toLocaleString()}
           </div>
           <div className="flex justify-between items-center mt-3">
             <div className="flex items-center space-x-2">
               <button
                 className="text-blue-500 hover:underline"
-                onClick={() => handleLike(post.post.PostId)}
+                onClick={() => handleLike(post.PostId)}
               >
                 Beğen
               </button>
               <button
                 className="text-blue-500 hover:underline"
-                onClick={() => handlePage(post.post.PostId)}
+                onClick={() => handlePage(post.PostId)}
               >
-                Yorum Yap {post.post.Comments.length}
+                Yorum Yap {post.Comments.length}
               </button>
             </div>
-            <span className="text-gray-500">{post.post.CountLike} Beğeni</span>
+            <span className="text-gray-500">{post.CountLike} Beğeni</span>
           </div>
         </div>
       ))}

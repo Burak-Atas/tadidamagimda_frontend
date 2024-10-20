@@ -12,6 +12,7 @@ import PrivateRoute from "../Private/PrivateRoute";
 import NotLogin from "../Components/NotLogin";
 import AuthServices from "../Services/AuthServices";
 import { StarIcon } from "@heroicons/react/outline";
+import OrderProfil from "../Components/OrderProfil";
 
 export default function DefaulPage( {authService}) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sol Sidebar görünürlüğü için state
@@ -77,6 +78,11 @@ export default function DefaulPage( {authService}) {
           <Route path="/profil" element={
             <PrivateRoute authService={authService}>
               <Profil isMobile={isMobile}  authService={authService}  />
+            </PrivateRoute>
+          } />
+          <Route path="/profil/:user_name" element={
+            <PrivateRoute authService={authService}>
+              <OrderProfil isMobile={isMobile}  authService={authService}  />
             </PrivateRoute>
           } />
           <Route path="/login" element={<NotLogin isMobile={isMobile} sse={sse} />} />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProfilService from '../Services/ProfilService';
 import Post from './Post';
 import { FaCamera } from 'react-icons/fa'; // İkon için react-icons kütüphanesini kullanabilirsiniz.
+import PostProfil from './PostProfil';
 
 export default function Profil({ authService }) {
   const [posts, setPosts] = useState([]);
@@ -68,32 +69,7 @@ export default function Profil({ authService }) {
     setIsEditing(true);
   };
 
-  const handleUpdateProfile = async () => {
-    const profilService = new ProfilService(authService);
-    const formData = new FormData();
-
-    // Append user data to formData
-    for (const key in userData) {
-      formData.append(key, userData[key]);
-    }
-
-    // Append the selected file to formData if it exists
-    const imageInput = document.getElementById('profileImageInput');
-    if (imageInput.files[0]) {
-      formData.append('profile_image', imageInput.files[0]);
-    }
-
-    try {
-      const response = await profilService.updateProfile(formData);
-      if (response.status) {
-        alert("Profile updated successfully!");
-        setIsEditing(false);
-        setProfileImage(null); // Reset image after update
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
-  };
+  
 
   const currentUser = authService.CurrentUser();
 
@@ -143,63 +119,11 @@ export default function Profil({ authService }) {
           </ul>
         </div>
         {posts && posts.length > 0 && (
-          <Post posts={posts} handleLike={() => { }} handlePage={() => { }} />
+          <PostProfil posts={posts} handleLike={() => { }} handlePage={() => { }} />
         )}
       </div>
 
-      {/* Edit Profile Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-md w-1/3">
-            <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-            <input
-              type="text"
-              name="user_name"
-              value={userData.user_name}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full mb-2"
-              placeholder="User_name"
-            />
-            <input
-              type="text"
-              name="first_name"
-              value={userData.first_name}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full mb-2"
-              placeholder="first_name"
-            />
-            <input
-              type="text"
-              name="last_name"
-              value={userData.last_name}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full mb-2"
-              placeholder="last_name"
-            />
-            <textarea
-              name="bio"
-              value={userData.bio}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full mb-2"
-              placeholder="Bio"
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="bg-gray-300 text-black py-1 px-3 rounded mr-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateProfile}
-                className="bg-blue-500 text-white py-1 px-3 rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

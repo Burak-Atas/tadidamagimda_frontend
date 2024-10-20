@@ -16,6 +16,7 @@ class ProfilService {
     updateProfile(responseData){
         return axiosInstance.post(`${this.user_name}/profil/update`,responseData);
     }
+   
     profilPostDetails(){
         return 
     }
